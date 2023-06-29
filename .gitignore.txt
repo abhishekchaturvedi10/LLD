@@ -1,2 +1,2 @@
-.idea
-/Design Patterns/.idea
+.idea/
+/Design Patterns/.idea/
