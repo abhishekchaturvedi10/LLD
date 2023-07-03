@@ -3,15 +3,6 @@ package LLD.Factory;
 import static LLD.Factory.ProductFactory.getProductFactory;
 
 public class FactoryApplication {
-    static {
-        try {
-            Class.forName("LLD.Factory.ProductOne");
-            Class.forName("LLD.Factory.ProductTwo");
-        } catch (ClassNotFoundException e) {
-            System.out.println("Cannot load class");
-            e.printStackTrace();
-        }
-    }
 
     public static void main(String[] args) {
         getProductFactory().registerProduct("P1", ProductOne.class);
