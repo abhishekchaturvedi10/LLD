@@ -1,9 +1,7 @@
 package LLD.Strategy;
 
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-@SpringBootApplication
 public class StrategyApplication {
+
 	public static void main(String[] args) {
 
 		Robot r1 = new Robot("BigG");
