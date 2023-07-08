@@ -1,9 +1,7 @@
 package LLD.Strategy;
 
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-@SpringBootApplication
 public class StrategyApplication {
+
 	public static void main(String[] args) {
 
 		Robot r1 = new Robot("BigG");
@@ -18,10 +16,13 @@ public class StrategyApplication {
 		r2.move();
 		r3.move();
 
-		System.out.println("\r\nNew behaviours: " +
-				"\r\n\t'BigG' gets really scared" +
-				"\r\n\t'George v.2.1' becomes really mad because it's always attacked by other robots" +
-				"\r\n\t'R2' keeps its calm\r\n");
+		System.out.println("""
+				\r
+				New behaviours: \r
+				\t'BigG' gets really scared\r
+				\t'George v.2.1' becomes really mad because it's always attacked by other robots\r
+				\t'R2' keeps its calm\r
+				""");
 
 		r1.setBehaviour(new DefensiveBehaviour());
 		r2.setBehaviour(new AggressiveBehaviour());

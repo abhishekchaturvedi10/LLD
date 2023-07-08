@@ -14,6 +14,6 @@ public class Robot {
 
     public void move() {
         int step = behaviour.moveCommand();
-        System.out.println("Robot " + name + " moved " + step);
+        System.out.println(name + " moved " + step);
     }
 }
