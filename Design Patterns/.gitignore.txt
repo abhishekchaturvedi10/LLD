@@ -1,3 +1,4 @@
 .idea/
 /Creational/.idea/
 /Behavioral/.idea/
+/Structural/.idea/
