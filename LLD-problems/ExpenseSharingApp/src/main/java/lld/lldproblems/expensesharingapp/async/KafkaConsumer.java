@@ -8,11 +8,11 @@ import lld.lldproblems.expensesharingapp.model.request.ExpenseRequest;
 import lld.lldproblems.expensesharingapp.model.request.Request;
 import lld.lldproblems.expensesharingapp.model.request.RequestWrapper;
 import lld.lldproblems.expensesharingapp.service.ExpenseService;
+import lld.lldproblems.expensesharingapp.service.UserService;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 import java.util.concurrent.*;
 
@@ -26,6 +26,9 @@ public class KafkaConsumer {
 	
 	@Autowired
 	private ExpenseService expenseService;
+	
+	@Autowired
+	private UserService userService;
 	
 	@PostConstruct
 	public void init() {
@@ -71,7 +74,7 @@ public class KafkaConsumer {
 				);
 				requestWrapper.getFuture().complete("Expense added successfully: " + expense);
 			} else if (requestWrapper.getRequest() instanceof BalanceRequest balanceRequest) {
-				BigDecimal balance = expenseService.getUserBalance(balanceRequest.getUserId());
+				BigDecimal balance = userService.getUserBalance(balanceRequest.getUserId());
 				requestWrapper.getFuture().complete(balance);
 			} else {
 				requestWrapper.getFuture().complete("Unknown request type");

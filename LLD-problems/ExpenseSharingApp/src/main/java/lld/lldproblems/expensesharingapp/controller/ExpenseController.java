@@ -1,6 +1,5 @@
 package lld.lldproblems.expensesharingapp.controller;
 
-import lld.lldproblems.expensesharingapp.model.request.BalanceRequest;
 import lld.lldproblems.expensesharingapp.model.request.ExpenseRequest;
 import lld.lldproblems.expensesharingapp.async.KafkaConsumer;
 import lld.lldproblems.expensesharingapp.service.ExpenseService;
@@ -25,15 +24,5 @@ public class ExpenseController {
 		kafkaConsumer.addRequest(request, future);
 		Object result = future.get(); // waits for result
 		return ResponseEntity.status(200).body(result);
-	}
-	
-	@GetMapping("/balance/{userId}")
-	public ResponseEntity<Object> getUserBalance(@PathVariable Long userId) throws Exception {
-		BalanceRequest request = new BalanceRequest();
-		request.setUserId(userId);
-		CompletableFuture<Object> future = new CompletableFuture<>();
-		kafkaConsumer.addRequest(request, future);
-		Object result = future.get(); // waits for result
-		return ResponseEntity.ok(result);
 	}
 }

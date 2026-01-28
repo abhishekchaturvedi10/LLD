@@ -1,5 +1,6 @@
 package lld.lldproblems.expensesharingapp.service;
 
+import lld.lldproblems.expensesharingapp.exception.UserNotFoundException;
 import lld.lldproblems.expensesharingapp.model.Expense.Expense;
 import lld.lldproblems.expensesharingapp.model.Expense.ExpenseType;
 import lld.lldproblems.expensesharingapp.model.Split;
@@ -32,13 +33,16 @@ public class ExpenseService {
 		expense.setAmount(totalAmount);
 		expense.setExpenseType(expenseType);
 		
-		User paidByUser = userRepository.findById(paidByUserId).orElseThrow(() -> new RuntimeException("Paid by User not found"));
+		User paidByUser = userRepository.findById(paidByUserId).orElseThrow(() -> new UserNotFoundException("User with ID " + paidByUserId + " not found"));
 		List<Split> splits = new ArrayList<>();
 		
 		if ("EQUAL".equalsIgnoreCase(expenseType.toString())) {
-			BigDecimal equalShareAmount = totalAmount.divide(BigDecimal.valueOf(1+paidForUserIds.size()), 2, RoundingMode.DOWN);
+			BigDecimal equalShareAmount = totalAmount.divide(BigDecimal.valueOf(paidForUserIds.size()), 2, RoundingMode.DOWN);
 			for (long userId : paidForUserIds) {
-				User paidForUser = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+				if (userId == paidByUserId) {
+					continue;
+				}
+				User paidForUser = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("User with ID " + userId + " not found"));
 				Split split = new Split();
 				split.setExpense(expense);
 				split.setPaidBy(paidByUser.getId());
@@ -52,7 +56,11 @@ public class ExpenseService {
 			if (sum.setScale(2, RoundingMode.HALF_UP).compareTo(totalAmount.setScale(2, RoundingMode.HALF_UP)) != 0)
 				throw new IllegalArgumentException("Sum of exact amounts does not match total amount");
 			for (int i=0; i<paidForUserIds.size(); i++) {
-				User paidForUser = userRepository.findById(paidForUserIds.get(i)).orElseThrow(() -> new RuntimeException("User not found"));
+				if (paidByUserId.equals(paidForUserIds.get(i))) {
+					continue;
+				}
+				int finalI = i;
+				User paidForUser = userRepository.findById(paidForUserIds.get(i)).orElseThrow(() -> new UserNotFoundException("User with ID " + paidForUserIds.get(finalI) + " not found"));
 				Split split = new Split();
 				split.setExpense(expense);
 				split.setPaidBy(paidByUser.getId());
@@ -66,7 +74,11 @@ public class ExpenseService {
 			if (sum.setScale(2, RoundingMode.HALF_UP).compareTo(BigDecimal.valueOf(100.0).setScale(2, RoundingMode.HALF_UP)) != 0)
 				throw new IllegalArgumentException("Sum of percents does not equal 100");
 			for (int i=0; i<paidForUserIds.size(); i++) {
-				User paidForUser = userRepository.findById(paidForUserIds.get(i)).orElseThrow(() -> new RuntimeException("User not found"));
+				if (paidByUserId.equals(paidForUserIds.get(i))) {
+					continue;
+				}
+				int finalI = i;
+				User paidForUser = userRepository.findById(paidForUserIds.get(i)).orElseThrow(() -> new UserNotFoundException("User with ID " + paidForUserIds.get(finalI) + " not found"));
 				Split split = new Split();
 				split.setExpense(expense);
 				split.setPaidBy(paidByUser.getId());
@@ -85,18 +97,5 @@ public class ExpenseService {
 		expenseRepository.save(expense);
 		splitRepository.saveAll(splits);
 		return expense;
-	}
-	
-	public BigDecimal getUserBalance(Long userId) {
-		BigDecimal balance = BigDecimal.ZERO;
-		List<Split> paidForSplits = splitRepository.findByPaidFor(userId);
-		for (Split split : paidForSplits) {
-			balance = balance.subtract(split.getAmount());
-		}
-		List<Split> paidBySplits = splitRepository.findByPaidBy(userId);
-		for (Split split : paidBySplits) {
-			balance = balance.add(split.getAmount());
-		}
-		return balance.setScale(2, RoundingMode.HALF_UP);
 	}
 }

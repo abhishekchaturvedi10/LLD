@@ -1,6 +1,5 @@
 package lld.lldproblems.expensesharingapp.exception;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -10,11 +9,11 @@ public class GlobalExceptionHandler {
 	
 	@ExceptionHandler(IllegalArgumentException.class)
 	public ResponseEntity<String> handleBadRequestException(IllegalArgumentException ex) {
-		return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+		return ResponseEntity.status(400).body("Illegal request: " + ex.getMessage());
 	}
 	
-	@ExceptionHandler(Exception.class)
-	public ResponseEntity<String> handleInternalServerError(Exception ex) {
-		return new ResponseEntity<>("Internal server error: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+	@ExceptionHandler(UserNotFoundException.class)
+	public ResponseEntity<String> handleUserNotFoundException(Exception ex) {
+		return ResponseEntity.status(404).body("Not found error: " + ex.getMessage());
 	}
 }
