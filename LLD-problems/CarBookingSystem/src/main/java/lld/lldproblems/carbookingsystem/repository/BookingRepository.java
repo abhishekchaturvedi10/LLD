@@ -1,6 +1,6 @@
-package interview.lld.carbookingsystem.repository;
+package lld.lldproblems.carbookingsystem.repository;
 
-import interview.lld.carbookingsystem.model.Booking;
+import lld.lldproblems.carbookingsystem.model.Booking;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {

@@ -1,4 +1,4 @@
-package interview.lld.carbookingsystem.model;
+package lld.lldproblems.carbookingsystem.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

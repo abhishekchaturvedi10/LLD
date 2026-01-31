@@ -1,4 +1,4 @@
-package interview.lld.carbookingsystem.model.Car;
+package lld.lldproblems.carbookingsystem.model.Car;
 
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.*;

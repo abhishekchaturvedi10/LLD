@@ -1,4 +1,4 @@
-package interview.lld.carbookingsystem.model.Request;
+package lld.lldproblems.carbookingsystem.model.Request;
 
 import lombok.Data;
 

@@ -1,9 +1,9 @@
-package interview.lld.carbookingsystem.Controller;
+package lld.lldproblems.carbookingsystem.Controller;
 
-import interview.lld.carbookingsystem.model.Branch;
-import interview.lld.carbookingsystem.model.Car.CarType;
-import interview.lld.carbookingsystem.model.Request.PriceRequest;
-import interview.lld.carbookingsystem.repository.BranchRepository;
+import lld.lldproblems.carbookingsystem.model.Branch;
+import lld.lldproblems.carbookingsystem.model.Car.CarType;
+import lld.lldproblems.carbookingsystem.model.Request.PriceRequest;
+import lld.lldproblems.carbookingsystem.repository.BranchRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

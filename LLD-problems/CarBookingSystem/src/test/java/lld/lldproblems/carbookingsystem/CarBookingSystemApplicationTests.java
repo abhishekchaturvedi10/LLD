@@ -1,10 +1,10 @@
-package interview.lld.carbookingsystem;
+package lld.lldproblems.carbookingsystem;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class CafBookingSystemApplicationTests {
+class CarBookingSystemApplicationTests {
 
 	@Test
 	void contextLoads() {

@@ -1,4 +1,4 @@
-package interview.lld.carbookingsystem.model.Car;
+package lld.lldproblems.carbookingsystem.model.Car;
 
 public enum CarType {
 	SUV,

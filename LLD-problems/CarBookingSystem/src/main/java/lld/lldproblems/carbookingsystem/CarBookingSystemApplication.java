@@ -1,4 +1,4 @@
-package interview.lld.carbookingsystem;
+package lld.lldproblems.carbookingsystem;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class CarBookingSystemApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(SliceApplication.class, args);
+		SpringApplication.run(CarBookingSystemApplication.class, args);
 	}
 
 }

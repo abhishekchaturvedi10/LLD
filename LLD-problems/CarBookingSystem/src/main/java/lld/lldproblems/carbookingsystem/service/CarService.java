@@ -1,9 +1,9 @@
-package interview.lld.carbookingsystem.service;
+package lld.lldproblems.carbookingsystem.service;
 
-import interview.lld.carbookingsystem.model.Branch;
-import interview.lld.carbookingsystem.model.Car.Car;
-import interview.lld.carbookingsystem.repository.BranchRepository;
-import interview.lld.carbookingsystem.repository.CarRepository;
+import lld.lldproblems.carbookingsystem.model.Branch;
+import lld.lldproblems.carbookingsystem.model.Car.Car;
+import lld.lldproblems.carbookingsystem.repository.BranchRepository;
+import lld.lldproblems.carbookingsystem.repository.CarRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

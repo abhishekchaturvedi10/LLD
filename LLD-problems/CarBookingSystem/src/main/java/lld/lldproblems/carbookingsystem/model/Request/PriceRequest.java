@@ -1,6 +1,6 @@
-package interview.lld.carbookingsystem.model.Request;
+package lld.lldproblems.carbookingsystem.model.Request;
 
-import interview.lld.carbookingsystem.model.Car.CarType;
+import lld.lldproblems.carbookingsystem.model.Car.CarType;
 import lombok.Data;
 
 @Data
