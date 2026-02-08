@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class AsyncService {
 	
-	@Async
+	@Async("threadPoolTaskExecutor")
 	public void executeAsyncTask(String payload) {
 		log.info("Thread - {} is processing payload - {}", Thread.currentThread().threadId(), payload);
 		try {
