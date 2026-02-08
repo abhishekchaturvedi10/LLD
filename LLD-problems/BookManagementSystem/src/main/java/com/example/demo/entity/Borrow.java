@@ -14,10 +14,10 @@ public class Borrow {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	@ManyToOne
+	@OneToOne
 	private User user;
 	
-	@ManyToOne
+	@OneToOne
 	private Book book;
 	
 	private boolean returned = false;
