@@ -11,8 +11,8 @@
 	<groupId>Interview.LLD</groupId>
 	<artifactId>CarBookingSystem</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>slice</name>
-	<description>slice</description>
+	<name>CarBookingSystem</name>
+	<description>CarBookingSystem</description>
 	<url/>
 	<licenses>
 		<license/>
@@ -27,7 +27,8 @@
 		<url/>
 	</scm>
 	<properties>
-		<java.version>17</java.version>
+		<maven.compiler.source>21</maven.compiler.source>
+		<maven.compiler.target>21</maven.compiler.target>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -83,7 +84,10 @@
 							<artifactId>lombok</artifactId>
 						</path>
 					</annotationProcessorPaths>
-				</configuration>
+                    <source>21</source>
+                    <target>21</target>
+<!--                    <compilerArgs>&#45;&#45;enable-preview</compilerArgs>-->
+                </configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

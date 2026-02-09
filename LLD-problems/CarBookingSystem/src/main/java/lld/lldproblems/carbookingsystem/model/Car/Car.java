@@ -22,8 +22,8 @@ import java.util.List;
 public abstract class Car {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
-	private Long branchId;
+	Long id;
+	Long branchId;
 	public abstract String getType();
-	private List<Long> bookingIds;
+	List<Long> bookingIds = List.of();
 }

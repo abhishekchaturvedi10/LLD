@@ -8,11 +8,13 @@ import lld.lldproblems.carbookingsystem.repository.BookingRepository;
 import lld.lldproblems.carbookingsystem.repository.BranchRepository;
 import lld.lldproblems.carbookingsystem.repository.CarRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class BookingService {
@@ -26,73 +28,114 @@ public class BookingService {
 	@Autowired
 	private BranchRepository branchRepository;
 	
-	public Car assignCar(String carType, String fromDatetime, String toDatetime) {
-		List<Car> cars = carRepository.findAll();
-		Double minPrice = Double.MAX_VALUE;
-		Car assignedCar = null;
-		for(Car car: cars) {
-			if(car.getType().toString() != carType || !checkAvailability(car, fromDatetime, toDatetime)) {
-				continue;
-			}
-			Long branchId = car.getBranchId();
-			Branch branch = branchRepository.findById(branchId).orElse(null);
-			if (branch == null) {
-				throw new IllegalArgumentException("Branch not found");
-			}
-			Double carPrice;
-			if (carType.equals(CarType.SUV.toString())) {
-				carPrice = branch.getSUVPrice();
-			} else if (carType.equals(CarType.SEDAN.toString())) {
-				carPrice = branch.getSedanPrice();
-			} else if (carType.equals(CarType.HATCHBACK.toString())) {
-				carPrice = branch.getHatchbackPrice();
-			} else {
-				throw new IllegalArgumentException("Invalid car type");
-			}
-			if (carPrice < minPrice) {
-				minPrice = carPrice;
-				assignedCar = car;
-			} else  if (minPrice.equals(carPrice)) {
-				if (assignedCar != null && car.getId() < assignedCar.getId()) {
-					assignedCar = car;
-				}
-			}
-		}
-		if (assignedCar == null) {
-			return null;
-		}
-		Booking booking = bookingRepository.save(new Booking(assignedCar.getId(), minPrice*getHoursDifference(fromDatetime, toDatetime), fromDatetime, toDatetime));
-		assignedCar.getBookingIds().add(booking.getId());
-		carRepository.save(assignedCar);
-		return assignedCar;
+	@Async
+	protected CompletableFuture<List<Car>> findAllCarsAsync() {
+		return CompletableFuture.completedFuture(carRepository.findAll());
 	}
 	
-	private Boolean checkAvailability(Car car, String fromDatetime, String toDatetime) {
+	@Async
+	protected CompletableFuture<Optional<Branch>> findBranchByIdAsync(Long id) {
+		return CompletableFuture.completedFuture(branchRepository.findById(id));
+	}
+	
+	@Async
+	protected CompletableFuture<Optional<Booking>> findBookingByIdAsync(Long id) {
+		return CompletableFuture.completedFuture(bookingRepository.findById(id));
+	}
+	
+	@Async
+	protected CompletableFuture<Booking> saveBookingAsync(Booking booking) {
+		return CompletableFuture.completedFuture(bookingRepository.save(booking));
+	}
+	
+	@Async
+	protected CompletableFuture<Car> saveCarAsync(Car car) {
+		return CompletableFuture.completedFuture(carRepository.save(car));
+	}
+	
+	@Async("threadPoolTaskExecutor")
+	public CompletableFuture<Car> assignCar(String carType, String fromDatetime, String toDatetime) {
+		return findAllCarsAsync().thenCompose(cars -> {
+			List<CompletableFuture<Optional<Map.Entry<Car, Double>>>> futures = cars.stream()
+					.filter(car -> Objects.equals(car.getType(), carType))
+					.map(car ->
+							checkAvailability(car, fromDatetime, toDatetime)
+									.thenCompose((Boolean available) -> {
+										if (!available) {
+											return CompletableFuture.<Optional<Map.Entry<Car, Double>>>completedFuture(Optional.empty());
+										}
+										return findBranchByIdAsync(car.getBranchId())
+												.thenApply(branch -> {
+													if (branch.isEmpty()) {
+														return Optional.empty();
+													}
+													Branch branchObj = branch.get();
+													double price;
+													if (CarType.SUV.toString().equalsIgnoreCase(carType)) {
+														price = branchObj.getSUVPrice();
+													} else if (CarType.SEDAN.toString().equalsIgnoreCase(carType)) {
+														price = branchObj.getSedanPrice();
+													} else if (CarType.HATCHBACK.toString().equalsIgnoreCase(carType)) {
+														price = branchObj.getHatchbackPrice();
+													} else {
+														price = Double.MAX_VALUE;
+													}
+													return Optional.of(new AbstractMap.SimpleEntry<>(car, price));
+												});
+									})
+					)
+					.toList();
+			if (futures.isEmpty()) {
+				return CompletableFuture.completedFuture(null);
+			}
+			CompletableFuture<Void> all = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+			return all.thenCompose(ignored -> {
+				// Find the min entry (car, price)
+				Optional<Map.Entry<Car, Double>> minEntry = futures.stream()
+						.map(CompletableFuture::join)
+						.filter(Optional::isPresent)
+						.map(Optional::get)
+						.min(Comparator.comparingDouble(Map.Entry::getValue));
+				
+				if (minEntry.isEmpty()) {
+					return CompletableFuture.completedFuture(null);
+				}
+				Car assignedCar = minEntry.get().getKey();
+				double minPrice = minEntry.get().getValue();
+				double totalPrice = minPrice * getHoursDifference(fromDatetime, toDatetime);
+				
+				Booking booking = new Booking(assignedCar.getId(), totalPrice, fromDatetime, toDatetime);
+				
+				return saveBookingAsync(booking).thenCompose(savedBooking -> {
+					assignedCar.getBookingIds().add(savedBooking.getId());
+					return saveCarAsync(assignedCar);
+				});
+			});
+		});
+	}
+	
+	@Async("threadPoolTaskExecutor")
+	protected CompletableFuture<Boolean> checkAvailability(Car car, String fromDatetime, String toDatetime) {
 		List<Long> bookingIds = car.getBookingIds();
-		for(Long bookingId: bookingIds) {
-			Booking booking = bookingRepository.findById(bookingId).orElse(null);
-			if (booking == null) {
-				System.out.println("Booking not found for id: " + bookingId);
-				continue;
-			}
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-			LocalDateTime bookingFromDatetime = LocalDateTime.parse(booking.getStarDatetime(), formatter);
-			LocalDateTime bookingToDatetime = LocalDateTime.parse(booking.getEndDatetime(), formatter);
-			LocalDateTime reqFromDatetime = LocalDateTime.parse(fromDatetime, formatter);
-			LocalDateTime reqToDatetime = LocalDateTime.parse(toDatetime, formatter);
-			long bookingFromMillis = bookingFromDatetime.toInstant(java.time.ZoneOffset.UTC).toEpochMilli();
-			long reqFromMillis = reqFromDatetime.toInstant(java.time.ZoneOffset.UTC).toEpochMilli();
-			long bookingToMillis = bookingToDatetime.toInstant(java.time.ZoneOffset.UTC).toEpochMilli();
-			long reqToMillis = reqToDatetime.toInstant(java.time.ZoneOffset.UTC).toEpochMilli();
-			if (bookingFromMillis >= reqFromMillis && bookingFromMillis <= reqToMillis) {
-				return false;
-			} else if (bookingToMillis >= reqFromMillis && bookingToMillis >= reqToMillis) {
-				return false;
-			} else if (bookingFromMillis <= reqFromMillis && bookingToMillis >= reqToMillis) {
-				return false;
-			}
+		CompletableFuture<Boolean> result = CompletableFuture.completedFuture(true);
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+		LocalDateTime reqFromDatetime = LocalDateTime.parse(fromDatetime, formatter);
+		LocalDateTime reqToDatetime = LocalDateTime.parse(toDatetime, formatter);
+		
+		for (Long bookingId : bookingIds) {
+			CompletableFuture<Optional<Booking>> bookingFuture = findBookingByIdAsync(bookingId);
+			result = result.thenCombine(bookingFuture, (available, bookingOpt) -> {
+				if (!available) return false;
+				if (bookingOpt.isPresent()) {
+					Booking booking = bookingOpt.get();
+					LocalDateTime bookingFromDatetime = LocalDateTime.parse(booking.getStarDatetime(), formatter);
+					LocalDateTime bookingToDatetime = LocalDateTime.parse(booking.getEndDatetime(), formatter);
+					return (bookingToDatetime.isBefore(reqFromDatetime) || bookingFromDatetime.isAfter(reqToDatetime));
+				}
+				return true;
+			});
 		}
-		return true;
+		return result;
 	}
 	
 	public double getHoursDifference(String fromDatetime, String toDatetime) {
