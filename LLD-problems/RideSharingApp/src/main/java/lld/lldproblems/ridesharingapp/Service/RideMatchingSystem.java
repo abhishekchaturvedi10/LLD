@@ -1,4 +1,4 @@
-package lld.lldproblems.ridesharingapp;
+package lld.lldproblems.ridesharingapp.Service;
 
 import lld.lldproblems.ridesharingapp.FareStrategy.FareStrategy;
 import lld.lldproblems.ridesharingapp.Location.Location;

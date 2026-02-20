@@ -1,4 +1,4 @@
-package lld.lldproblems.ridesharingapp;
+package lld.lldproblems.ridesharingapp.Service;
 
 import lld.lldproblems.ridesharingapp.Location.Location;
 import lld.lldproblems.ridesharingapp.User.Driver;
