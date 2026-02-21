@@ -74,10 +74,10 @@ public class RideSharingAppApplication {
 			
 			int rideTypeIndex = random.nextInt(rideTypes.length);
 			RideType rideType = rideTypes[rideTypeIndex];
+			FareStrategy fareStrategy = fareStrategies[rideTypeIndex];
 			Location fromLocation = fromLocations[random.nextInt(fromLocations.length)];
 			Location toLocation = toLocations[random.nextInt(toLocations.length)];
 			String vehicleType = vehicleTypes[random.nextInt(vehicleTypes.length)];
-			FareStrategy fareStrategy = fareStrategies[rideTypeIndex];
 			
 			rideMatchingSystem.requestRide(
 					passenger,
