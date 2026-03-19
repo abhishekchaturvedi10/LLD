@@ -4,15 +4,17 @@ package lld.lldproblems.messagequeue;
 public class Subscriber {
 	
 	private final String name;
+	private ExecutorService executor;
 	
 	public Subscriber(String name) {
 		this.name = name;
+		this.executor = Executors.newCachedThreadPool();
 	}
 	
 	public void subscribe(Topic topic) {
 		for (Partition partition : topic.getPartitions()) {
 			partition.registerSubscriber(this);
-			new Thread(() -> consumeMessages(partition)).start();
+			executor.submit(() -> consumeMessages(partition));
 		}
 	}
 	
